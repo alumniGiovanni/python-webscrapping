@@ -2,6 +2,9 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 
+import pandas as pd
+
+
 # para rodar o chrome em 2º plano
 # from selenium.webdriver.chrome.options import Options
 # chrome_options = Options()
@@ -44,3 +47,22 @@ cotacao_ouro = cotacao_ouro.replace(",", ".")
 print(cotacao_ouro)
 
 navegador.quit()
+
+tabela = pd.read_excel("Produtos.xlsx")
+print(tabela)
+
+tabela.loc[tabela["Moeda"] == "Dólar", "Cotação"] = float(cotacao_dolar)
+tabela.loc[tabela["Moeda"] == "Euro", "Cotação"] = float(cotacao_euro)
+tabela.loc[tabela["Moeda"] == "Ouro", "Cotação"] = float(cotacao_ouro)
+
+# atualizar o preço base reais (preço base original * cotação)
+tabela["Preço de Compra"] = tabela["Preço Original"] * tabela["Cotação"]
+
+# atualizar o preço final (preço base reais * Margem)
+tabela["Preço de Venda"] = tabela["Preço de Compra"] * tabela["Margem"]
+
+# tabela["Preço de Venda"] = tabela["Preço de Venda"].map("R${:.2f}".format)
+
+print(tabela)
+
+tabela.to_excel("Produtos Novo.xlsx", index=False)
